@@ -13,6 +13,7 @@ local function genNegatives(N_entities, hypernyms, method, negatives)
         local index = torch.rand(hypernyms:size(1), 1):mul(2):ceil():cmax(1):long() -- indices, between 1 and 2
         negatives = hypernyms:clone()
         negatives:scatter(2, index, randomEntities)
+        m = 0
     elseif method == 'sample' then
          local s = 1
          local e = hypernyms:size(1)

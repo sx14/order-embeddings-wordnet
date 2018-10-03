@@ -4,14 +4,14 @@ local argparse = require 'argparse'
 
 parser = argparse('Train a WordNet completion model')
 parser:option '--seed' :description 'random seed' : default '1234' :convert(tonumber)
-parser:option '-d' :description 'dimensionality of embedding space' :default "50" :convert(tonumber)
-parser:option '--epochs' :description 'number of epochs to train for ' :default "1" :convert(tonumber)
+parser:option '-d' :description 'dimensionality of embedding space' :default "300" :convert(tonumber)
+parser:option '--epochs' :description 'number of epochs to train for ' :default "50" :convert(tonumber)
 parser:option '--batchsize' :description 'size of minibatch to use' :default "1000" :convert(tonumber)
 parser:option '--eval_freq' :description 'evaluation frequency' :default "100" :convert(tonumber)
 parser:option '--lr' :description 'learning rate' :default "0.01" :convert(tonumber)
 parser:option '--train' :description 'dataset to use for training' :default 'contrastive_trans'
 parser:option '--eval' :description 'dataset to use for evaluation' :args('*')
-parser:option '--name' :description 'name of model' :default 'anon'
+parser:option '--name' :description 'name of model' :default 'my_model'
 parser:option '--margin' :description 'size of margin to use for contrastive learning' :default '1' :convert(tonumber)
 parser:option '--norm' :description 'norm to use, "inf" for infinity' :default "2" :convert(tonumber)
 parser:option '--eps' :description 'constant to use to prevent hypernyms from being mapped to the exact same spot' :default "0" :convert(tonumber)
@@ -32,12 +32,16 @@ end
 torch.manualSeed(args.seed)
 
 require 'Dataset'
-local datasets = torch.load('dataset/' .. args.train .. '.t7')
+-- local datasets = torch.load('dataset/' .. args.train .. '.t7')
+local datasets = torch.load('exp_dataset/' .. args.train .. '.t7')
 local datasets_eval = {}
 for _, name in ipairs(args.eval) do
-    datasets_eval[name] = torch.load('dataset/' .. name .. '.t7')
+    -- datasets_eval[name] = torch.load('dataset/' .. name .. '.t7')
+    datasets_eval[name] = torch.load('exp_dataset/' .. name .. '.t7')
 end
 local train = datasets.train
+
+
 
 
 local hyperparams = {
@@ -58,6 +62,8 @@ require 'optim'
 require 'HypernymScore'
 local config = { learningRate = args.lr }
 
+-- local lookupTableWeights = torch.load('weights.t7')
+-- local hypernymNet = nn.HypernymScore(hyperparams, datasets.numEntities, lookupTableWeights)
 local hypernymNet = nn.HypernymScore(hyperparams, datasets.numEntities)
 local criterion = nn.HingeEmbeddingCriterion(args.margin)
 
@@ -139,7 +145,7 @@ while train.epoch <= args.epochs do
         --print("Evaluating:")
         for name, dataset in pairs(datasets_eval) do
             local threshold, accuracy = findOptimalThreshold(dataset.val, hypernymNet)
-            --print("Best accuracy " .. accuracy .. " at threshold " .. threshold)
+            print("Best accuracy " .. accuracy .. " at threshold " .. threshold)
             local real_accuracy = evalClassification(dataset.test, hypernymNet, threshold)
             print(name .. " Accuracy " .. real_accuracy)
             log:update({[name .. "Accuracy"] = real_accuracy}, count * args.batchsize)
@@ -157,7 +163,7 @@ print("Best accuracy was at batch #" )
 print(pretty.write(best_counts,""))
 print(pretty.write(best_accuracies,""))
 
-torch.save('weights.t7', saved_weight)
+torch.save('weights_vs.t7', saved_weight)
 
 if args.vis then
     for name, dataset in pairs(datasets_eval) do
