@@ -17,7 +17,7 @@ for synset in all_nouns:
 
 
 # ==== append Visual Genome object classes ====
-vs2wn_path = '/media/sunx/Data/dataset/visual genome/my_output/label2wn.json'
+vs2wn_path = '/home/magus/dataset/visual genome/my_output/label2wn.json'
 # visual genome object labels
 with open(vs2wn_path, 'r') as vs2wn_file:
     vs2wn = json.load(vs2wn_file)
@@ -46,4 +46,4 @@ f.close()
 names = map(lambda s: s.name(), all_nouns)
 import json
 # json.dump(names, open('dataset/synset_names.json', 'w'))
-json.dump(names, open('dataset/synset_names_with"_VS.json', 'w'))
+json.dump(names, open('dataset/synset_names_with_VS.json', 'w'))
