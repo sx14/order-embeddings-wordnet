@@ -17,7 +17,7 @@ for synset in all_nouns:
 
 
 # ==== append Visual Genome object classes ====
-vs2wn_path = '/home/magus/dataset/visual genome/my_output/label2wn.json'
+vs2wn_path = 'exp_dataset/label2wn.json'
 # visual genome object labels
 with open(vs2wn_path, 'r') as vs2wn_file:
     vs2wn = json.load(vs2wn_file)
@@ -38,7 +38,7 @@ with open(vs2wn_path, 'r') as vs2wn_file:
 hypernyms = np.array(hypernyms)
 # save hypernyms
 import h5py
-f = h5py.File('dataset/wordnet_with_VS.h5', 'w')
+f = h5py.File('exp_dataset/wordnet_with_VS.h5', 'w')
 # f = h5py.File('dataset/wordnet.h5', 'w')
 f.create_dataset('hypernyms', data = hypernyms)
 f.close()
@@ -46,4 +46,4 @@ f.close()
 names = map(lambda s: s.name(), all_nouns)
 import json
 # json.dump(names, open('dataset/synset_names.json', 'w'))
-json.dump(names, open('dataset/synset_names_with_VS.json', 'w'))
+json.dump(names, open('exp_dataset/synset_names_with_VS.json', 'w'))
